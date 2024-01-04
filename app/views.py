@@ -347,3 +347,68 @@ def update_geo_prof_count(request):
     df.to_sql('geography_prof_count', conn, if_exists='replace', index=False)
 
     return HttpResponse(status=200)
+
+def update_total_key_skills(request):
+    conn = sqlite3.connect('db.sqlite3')
+    query = """SELECT key_skills FROM vacancies WHERE key_skills IS NOT NULL"""
+    cursor = conn.cursor()
+    cursor.execute(query)
+    vacancy_skills = cursor.fetchall()
+    skills_count = {}
+    for skills in vacancy_skills:
+        separated_skills = skills[0].split('\n')
+        for skill in separated_skills:
+            if skill in skills_count:
+                skills_count[skill] += 1
+            else:
+                skills_count[skill] = 1
+
+    sorted_skills = sorted(skills_count.items(), key=lambda item: item[1], reverse=True)
+
+    cursor.execute("""DELETE FROM skills_total;""")
+
+    for index, skill in enumerate(sorted_skills):
+        cursor.execute(f"""INSERT INTO skills_total VALUES ('{skill[0]}', {skill[1]});""")
+        conn.commit()
+        if index == 19:
+            break
+
+    conn.close()
+
+    return HttpResponse(status=200)
+
+def update_prof_key_skills(request):
+    conn = sqlite3.connect('db.sqlite3')
+    query = """SELECT key_skills FROM vacancies WHERE key_skills IS NOT NULL AND 
+                (instr(name, 'fullstack') OR
+                instr(name, 'фулстак') OR
+                instr(name, 'фуллтак') OR
+                instr(name, 'фуллстэк') OR
+                instr(name, 'фулстэк') OR
+                instr(name, 'full stack'))"""
+
+    cursor = conn.cursor()
+    cursor.execute(query)
+    vacancy_skills = cursor.fetchall()
+    skills_count = {}
+    for skills in vacancy_skills:
+        separated_skills = skills[0].split('\n')
+        for skill in separated_skills:
+            if skill in skills_count:
+                skills_count[skill] += 1
+            else:
+                skills_count[skill] = 1
+
+    sorted_skills = sorted(skills_count.items(), key=lambda item: item[1], reverse=True)
+
+    cursor.execute("""DELETE FROM skills_prof;""")
+
+    for index, skill in enumerate(sorted_skills):
+        cursor.execute(f"""INSERT INTO skills_prof VALUES ('{skill[0]}', {skill[1]});""")
+        conn.commit()
+        if index == 19:
+            break
+
+    conn.close()
+
+    return HttpResponse(status=200)
