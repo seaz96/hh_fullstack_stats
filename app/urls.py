@@ -21,6 +21,8 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', views.hello),
-    path('demand/count', views.demand_by_count),
-    path('demand/amount', views.demand_by_amount)
+    path('demand/update-count/total', views.demand_by_count),
+    path('demand/update-average/total', views.demand_by_average),
+    path('demand/update-count/prof', views.demand_by_count_prof),
+    path('demand/update-average/prof', views.demand_by_average_prof)
 ]
