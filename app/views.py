@@ -170,3 +170,180 @@ def demand_by_average_prof(request):
     conn.close()
     return HttpResponse(status=200)
 
+def update_geo_total_avg(request):
+    conn = sqlite3.connect('db.sqlite3')
+    query = """SELECT area_name AS 'Город',
+                    ROUND(AVG(CASE
+                            WHEN (salary_to IS NULL AND salary_from IS NULL )
+                                THEN 0
+                            WHEN (salary_to IS NULL)
+                                THEN ROUND(salary_from, 2)
+                            WHEN (salary_from IS NULL)
+                                THEN ROUND(salary_to, 2)
+                            ELSE
+                                ROUND((salary_to + salary_from) / 2, 2)
+                            END), 2) AS 'Уровень зарплат по городам',
+                    substr(published_at, 1, 7) AS 'Дата',
+                    salary_currency AS 'Валюта',
+                    SUM(CASE WHEN salary_to IS NULL AND salary_from IS NULL THEN 0 ELSE 1 END) AS 'Количество'
+                    FROM vacancies
+                    WHERE `Валюта` IS NOT NULL
+                    GROUP BY `Город`, `Дата`, `Валюта`;"""
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    total_area = {}
+    count_curr_area = {}
+    count_area = {}
+    total_count = 0
+    for vac in data:
+        sql_query = f"""SELECT * FROM currencies WHERE date = '{vac[2]}'"""
+        cursor.execute(sql_query)
+        if vac[3] == 'RUR':
+            currency = 1
+        else:
+            cur_data = cursor.fetchall()[0]
+            currency = cur_data[currency_columns[vac[3]]]
+
+        if (currency == float('nan') or currency is None):
+            continue
+
+        area = vac[0]
+        if area not in total_area.keys():
+            total_area[area] = vac[1] * currency
+            count_curr_area[area] = 1
+            count_area[area] = vac[4]
+        else:
+            total_area[area] += vac[1] * currency
+            count_curr_area[area] += 1
+            count_area[area] += vac[4]
+
+        total_count += vac[4]
+
+    cursor.execute("""DELETE FROM geography_total_average""")
+    conn.commit()
+
+    for area in total_area.keys():
+        if (count_area[area] / total_count >= 0.01):
+            cursor.execute(
+                f"""INSERT INTO geography_total_average VALUES ('{area}', {round(total_area[area] / count_curr_area[area], 2)})""")
+            conn.commit()
+
+    conn.close()
+
+    return HttpResponse(status=200)
+
+def update_geo_total_count(request):
+    conn = sqlite3.connect('db.sqlite3')
+    query = """SELECT area_name AS 'Город',
+                ROUND(cast(COUNT(*) as float) / cast((SELECT COUNT (*) from vacancies) as float) * 100.0, 2) as 'Доля вакансий'
+                FROM vacancies
+                GROUP BY area_name
+                HAVING COUNT(*) >= (SELECT COUNT(*) * 0.01 FROM vacancies)
+                ORDER BY `Доля вакансий` DESC
+                LIMIT 10;"""
+    df = pd.read_sql(query, conn)
+    df.to_sql('geography_total_count', conn, if_exists='replace', index=False)
+
+    return HttpResponse(status=200)
+
+def update_geo_prof_avg(request):
+    conn = sqlite3.connect('db.sqlite3')
+    query = """SELECT area_name AS 'Город',
+                ROUND(AVG(CASE
+                        WHEN (salary_to IS NULL AND salary_from IS NULL )
+                            THEN 0
+                        WHEN (salary_to IS NULL)
+                            THEN ROUND(salary_from, 2)
+                        WHEN (salary_from IS NULL)
+                            THEN ROUND(salary_to, 2)
+                        ELSE
+                            ROUND((salary_to + salary_from) / 2, 2)
+                        END), 2) AS 'Уровень зарплат по городам',
+                substr(published_at, 1, 7) AS 'Дата',
+                salary_currency AS 'Валюта',
+                COUNT(published_at) AS 'Количество'
+                FROM vacancies
+                WHERE `Валюта` IS NOT NULL AND (
+                      instr(name, 'fullstack') OR
+                      instr(name, 'фулстак') OR
+                      instr(name, 'фуллтак') OR
+                      instr(name, 'фуллстэк') OR
+                      instr(name, 'фулстэк') OR
+                      instr(name, 'full stack')
+                        )
+                GROUP BY `Город`, `Дата`, `Валюта`;"""
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    total_area = {}
+    count_curr_area = {}
+    count_area = {}
+    total_count = 0
+    for vac in data:
+        sql_query = f"""SELECT * FROM currencies WHERE date = '{vac[2]}'"""
+        cursor.execute(sql_query)
+        if vac[3] == 'RUR':
+            currency = 1
+        else:
+            cur_data = cursor.fetchall()[0]
+            currency = cur_data[currency_columns[vac[3]]]
+
+        if (currency == float('nan') or currency is None):
+            continue
+
+        area = vac[0]
+        if area not in total_area.keys():
+            total_area[area] = vac[1] * currency
+            count_curr_area[area] = 1
+            count_area[area] = vac[4]
+        else:
+            total_area[area] += vac[1] * currency
+            count_curr_area[area] += 1
+            count_area[area] += vac[4]
+
+        total_count += vac[4]
+
+    cursor.execute("""DELETE FROM geography_prof_average""")
+    conn.commit()
+
+    for area in total_area.keys():
+        if (count_area[area] / total_count >= 0.01):
+            cursor.execute(f"""INSERT INTO geography_prof_average VALUES ('{area}', {round(total_area[area] / count_curr_area[area], 2)})""")
+            conn.commit()
+
+    conn.close()
+
+    return HttpResponse(status=200)
+
+def update_geo_prof_count(request):
+    conn = sqlite3.connect('db.sqlite3')
+    query = """SELECT area_name AS 'Город',
+                ROUND(cast(COUNT(*) as float) / cast((SELECT COUNT (*) from vacancies WHERE(instr(name, 'fullstack') OR
+                      instr(name, 'фулстак') OR
+                      instr(name, 'фуллтак') OR
+                      instr(name, 'фуллстэк') OR
+                      instr(name, 'фулстэк') OR
+                      instr(name, 'full stack'))) as float) * 100.0, 2) as 'Доля вакансий'
+                FROM vacancies
+                WHERE(instr(name, 'fullstack') OR
+                      instr(name, 'фулстак') OR
+                      instr(name, 'фуллтак') OR
+                      instr(name, 'фуллстэк') OR
+                      instr(name, 'фулстэк') OR
+                      instr(name, 'full stack'))
+                GROUP BY area_name
+                HAVING COUNT(*) >= (SELECT COUNT(*) * 0.01 FROM vacancies WHERE(instr(name, 'fullstack') OR
+                      instr(name, 'фулстак') OR
+                      instr(name, 'фуллтак') OR
+                      instr(name, 'фуллстэк') OR
+                      instr(name, 'фулстэк') OR
+                      instr(name, 'full stack')))
+                ORDER BY `Доля вакансий` DESC
+                LIMIT 10;"""
+    df = pd.read_sql(query, conn)
+    df.to_sql('geography_prof_count', conn, if_exists='replace', index=False)
+
+    return HttpResponse(status=200)

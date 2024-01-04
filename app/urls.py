@@ -24,5 +24,9 @@ urlpatterns = [
     path('demand/update-count/total', views.demand_by_count),
     path('demand/update-average/total', views.demand_by_average),
     path('demand/update-count/prof', views.demand_by_count_prof),
-    path('demand/update-average/prof', views.demand_by_average_prof)
+    path('demand/update-average/prof', views.demand_by_average_prof),
+    path('geo/update-average/total', views.update_geo_total_avg),
+    path('geo/update-average/prof', views.update_geo_prof_avg),
+    path('geo/update-count/total', views.update_geo_total_count),
+    path('geo/update-count/prof', views.update_geo_prof_count)
 ]
