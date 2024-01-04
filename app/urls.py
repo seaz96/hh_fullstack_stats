@@ -29,5 +29,6 @@ urlpatterns = [
     path('geo/total/update-count', views.update_geo_total_count),
     path('geo/prof/update-count', views.update_geo_prof_count),
     path('skills/total/update-count', views.update_total_key_skills),
-    path('skills/prof/update-count', views.update_prof_key_skills)
+    path('skills/prof/update-count', views.update_prof_key_skills),
+    path('vac', views.get_vacancies)
 ]

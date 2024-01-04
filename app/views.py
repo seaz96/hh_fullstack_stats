@@ -1,7 +1,9 @@
+import datetime
 import sqlite3
 import pandas as pd
+import requests
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from app.models import *
@@ -412,3 +414,39 @@ def update_prof_key_skills(request):
     conn.close()
 
     return HttpResponse(status=200)
+
+
+def clean_vacancy(vacancy):
+    vacancy['area'] = vacancy['area']['name'] if vacancy['area'].__contains__('name') else 'Нет данных'
+    if vacancy['salary']['from'] != None and vacancy['salary']['to'] != None and vacancy['salary']['from'] != \
+                                                                                 vacancy['salary']['to']:
+        vacancy[
+            'salary'] = f"от {'{0:,}'.format(vacancy['salary']['from']).replace(',', ' ')} до {'{0:,}'.format(vacancy['salary']['to']).replace(',', ' ')} {vacancy['salary']['currency']}"
+    elif vacancy['salary']['from'] != None:
+        vacancy[
+            'salary'] = f"{'{0:,}'.format(vacancy['salary']['from']).replace(',', ' ')} {vacancy['salary']['currency']}"
+    elif vacancy['salary']['to'] != None:
+        vacancy[
+            'salary'] = f"{'{0:,}'.format(vacancy['salary']['to']).replace(',', ' ')} {vacancy['salary']['currency']}"
+    else:
+        vacancy['salary'] = 'Нет данных'
+    vacancy['key_skills'] = ', '.join(map(lambda x: x['name'], vacancy['key_skills']))
+    return vacancy
+
+
+def get_vacancies(request):
+    try:
+        data = []
+        info = requests.get('https://api.hh.ru/vacancies?text=%22fullstack%22&specialization=1&per_page=100').json()
+        for row in info['items']:
+            if any(x in row['name'].lower() for x in ['fullstack', 'фулстак', 'фуллтак', 'фуллстэк', 'фулстэк', 'full stack']) and not row['salary'] is None:
+                data.append({'id': row['id'], 'published_at': row['published_at']})
+        data = sorted(data, key=lambda x: x['published_at'])
+        vacancies = {}
+        for index, vacancy in enumerate(data[len(data) - 10:]):
+            vacancies[index] = clean_vacancy(requests.get(f'https://api.hh.ru/vacancies/{vacancy["id"]}').json())
+        return JsonResponse(vacancies)
+    except Exception as e:
+        print(e)
+        print(datetime.datetime.now())
+        return HttpResponse(status=500)
