@@ -3,6 +3,10 @@ import sqlite3
 import pandas as pd
 import requests
 import json
+from os.path import dirname, abspath
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -464,3 +468,26 @@ def get_vacancies(request):
         print(e)
         print(datetime.datetime.now())
         return HttpResponse(status=500)
+
+def update_demand_graphs(request):
+    con = sqlite3.connect('db.sqlite3')
+    df = pd.read_sql('SELECT * FROM demand_stats', con, index_col=None)
+
+    width = 0.4
+
+    years = [df['year'][i] for i in range(21)]
+    total_average = [df['total_average'][i] for i in range(21)]
+    prof_average = [df['prof_average'][i] for i in range(21)]
+    i = np.arange(len(years))
+
+    plt.figure().set_figwidth(12)
+    plt.bar(i + width / 2, total_average, width, label='Все профессии')
+    plt.bar(i + width * 1.5, prof_average, width, label='Fullstack-разработчик')
+    plt.xticks(i + width, years)
+    plt.title('Уровень зарплат по годам')
+    plt.legend(fontsize=12)
+
+    parent_dir = dirname(dirname(abspath(__file__)))
+    plt.savefig(parent_dir + '/media/demand_average.png')
+
+    return HttpResponse(status=200, content='Graphs updated!')
