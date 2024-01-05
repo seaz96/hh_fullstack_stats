@@ -527,3 +527,34 @@ def update_geo_graphs(request):
     plt.savefig(parent_dir + '/media/geo_graphs.png')
 
     return HttpResponse(status=200, content='Graphs updated!')
+
+def update_skills_graphs(request):
+    con = sqlite3.connect('db.sqlite3')
+    df = pd.read_sql('SELECT * FROM skills_prof', con, index_col=None)
+    years = list(df['date'])
+    averages = list(df['stats'])
+
+    fig, sub = plt.subplots(3, 3)
+    fig.set_figwidth(15)
+    fig.set_figheight(15)
+    year_index = 0
+
+    for x in range(3):
+        for y in range(3):
+            ax = sub[x, y]
+            data = json.loads(averages[year_index])
+            names = [x for index, x in enumerate(data.keys()) if index < 10]
+            counts = [x for index, x in enumerate(data.values()) if index < 10]
+            ax.bar(names, counts, width=0.4)
+            ax.set_xticks(np.arange(len(names)), names, rotation=50)
+            ax.set_title(years[year_index])
+            ax.xaxis.labelpad = 20
+
+            year_index += 1
+
+    fig.suptitle('Ключевые навыки для Fullstack-разработчика по годам', fontsize=24)
+    fig.tight_layout(pad=1.5)
+    parent_dir = dirname(dirname(abspath(__file__)))
+    plt.savefig(parent_dir + '/media/skills_graphs.png')
+
+    return HttpResponse(status=200, content='Graphs updated!')
