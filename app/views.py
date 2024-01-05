@@ -2,6 +2,7 @@ import datetime
 import sqlite3
 import pandas as pd
 import requests
+import json
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -352,25 +353,33 @@ def update_geo_prof_count(request):
 
 def update_total_key_skills(request):
     conn = sqlite3.connect('db.sqlite3')
-    query = """SELECT key_skills FROM vacancies WHERE key_skills IS NOT NULL"""
+    query = """SELECT key_skills, substr(published_at, 1, 4) FROM vacancies WHERE key_skills IS NOT NULL"""
     cursor = conn.cursor()
     cursor.execute(query)
     vacancy_skills = cursor.fetchall()
-    skills_count = {}
+    skills_date = {}
+
     for skills in vacancy_skills:
         separated_skills = skills[0].split('\n')
+        if skills[1] not in skills_date:
+            skills_date[skills[1]] = {}
         for skill in separated_skills:
-            if skill in skills_count:
-                skills_count[skill] += 1
+            if skill in skills_date[skills[1]]:
+                skills_date[skills[1]][skill] += 1
             else:
-                skills_count[skill] = 1
+                skills_date[skills[1]][skill] = 1
 
-    sorted_skills = sorted(skills_count.items(), key=lambda item: item[1], reverse=True)
+    for key, value in skills_date.items():
+        skills_date[key] = json.dumps({item[0]: item[1] for index, item in
+                                       enumerate(list(sorted(value.items(), key=lambda x: x[1], reverse=True))) if
+                                       index < 20})
+
+    sorted_skills = sorted(skills_date.items(), key=lambda item: item[0])
 
     cursor.execute("""DELETE FROM skills_total;""")
 
     for index, skill in enumerate(sorted_skills):
-        cursor.execute(f"""INSERT INTO skills_total VALUES ('{skill[0]}', {skill[1]});""")
+        cursor.execute(f"""INSERT INTO skills_total VALUES ({skill[0]}, '{skill[1]}');""")
         conn.commit()
         if index == 19:
             break
@@ -381,32 +390,37 @@ def update_total_key_skills(request):
 
 def update_prof_key_skills(request):
     conn = sqlite3.connect('db.sqlite3')
-    query = """SELECT key_skills FROM vacancies WHERE key_skills IS NOT NULL AND 
+    query = """SELECT key_skills, substr(published_at, 1, 4) FROM vacancies WHERE key_skills IS NOT NULL AND 
                 (instr(name, 'fullstack') OR
                 instr(name, 'фулстак') OR
                 instr(name, 'фуллтак') OR
                 instr(name, 'фуллстэк') OR
                 instr(name, 'фулстэк') OR
                 instr(name, 'full stack'))"""
-
     cursor = conn.cursor()
     cursor.execute(query)
     vacancy_skills = cursor.fetchall()
-    skills_count = {}
+    skills_date = {}
+
     for skills in vacancy_skills:
         separated_skills = skills[0].split('\n')
+        if skills[1] not in skills_date:
+            skills_date[skills[1]] = {}
         for skill in separated_skills:
-            if skill in skills_count:
-                skills_count[skill] += 1
+            if skill in skills_date[skills[1]]:
+                skills_date[skills[1]][skill] += 1
             else:
-                skills_count[skill] = 1
+                skills_date[skills[1]][skill] = 1
 
-    sorted_skills = sorted(skills_count.items(), key=lambda item: item[1], reverse=True)
+    for key, value in skills_date.items():
+        skills_date[key] = json.dumps({item[0]: item[1] for index, item in enumerate(list(sorted(value.items(), key=lambda x: x[1], reverse=True))) if index < 20})
+
+    sorted_skills = sorted(skills_date.items(), key=lambda item: item[0])
 
     cursor.execute("""DELETE FROM skills_prof;""")
 
     for index, skill in enumerate(sorted_skills):
-        cursor.execute(f"""INSERT INTO skills_prof VALUES ('{skill[0]}', {skill[1]});""")
+        cursor.execute(f"""INSERT INTO skills_prof VALUES ({skill[0]}, '{skill[1]}');""")
         conn.commit()
         if index == 19:
             break
