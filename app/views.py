@@ -491,3 +491,39 @@ def update_demand_graphs(request):
     plt.savefig(parent_dir + '/media/demand_average.png')
 
     return HttpResponse(status=200, content='Graphs updated!')
+
+def update_geo_graphs(request):
+    con = sqlite3.connect('db.sqlite3')
+    df = pd.read_sql('SELECT * FROM geography_prof_average', con, index_col=None)
+    new_df = df.sort_values(['average'], ascending=False)
+    area_names = list(new_df['area_name'])
+    averages = list(new_df['average'])
+
+    fig, sub = plt.subplots(1, 2)
+
+    fig.set_figwidth(13)
+    sub[0].barh(area_names, averages, align='center')
+    sub[0].invert_yaxis()
+    sub[0].grid(axis='x')
+    sub[0].tick_params(axis='x', labelsize=8)
+    sub[0].tick_params(axis='y', labelsize=6)
+    sub[0].set_title('Уровень зарплат по городам')
+
+    df = pd.read_sql('SELECT * FROM geography_prof_count', con, index_col=None)
+    area_names = list(df['area_name'])
+    counts = list(df['count'])
+    area_names.append('Другие')
+    counts.append(100 - sum(counts))
+
+    sub[1].set_prop_cycle(
+        color=['#0000FF', '#DC143C', '#A52A2A', '#7FFF00', '#8A2BE2', '#000000', '#D2691E', '#008B8B', '#B8860B',
+               '#006400', '#FF8C00', '#8B0000', '#2F4F4F', '#FF1493', '#FFD700', '#00FF00', '#BA55D3', '#FF4500',
+               '#800080'])
+    sub[1].pie(counts, labels=area_names, textprops={'fontsize': 8}, startangle=120)
+
+    sub[1].set_title('Доля вакансий по городам')
+
+    parent_dir = dirname(dirname(abspath(__file__)))
+    plt.savefig(parent_dir + '/media/geo_graphs.png')
+
+    return HttpResponse(status=200, content='Graphs updated!')
