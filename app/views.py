@@ -456,7 +456,7 @@ def clean_vacancy(vacancy):
     return vacancy
 
 
-def get_vacancies(request):
+def last_vacancies(request):
     try:
         data = []
         info = requests.get('https://api.hh.ru/vacancies?text=%22fullstack%22&specialization=1&per_page=100').json()
@@ -467,7 +467,10 @@ def get_vacancies(request):
         vacancies = {}
         for index, vacancy in enumerate(data[len(data) - 10:]):
             vacancies[index] = clean_vacancy(requests.get(f'https://api.hh.ru/vacancies/{vacancy["id"]}').json())
-        return JsonResponse(vacancies)
+
+        return render(request, 'vacancies.html',
+                      {'vacancies': vacancies.values()})
+
     except Exception as e:
         print(e)
         print(datetime.datetime.now())

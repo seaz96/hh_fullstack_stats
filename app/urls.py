@@ -38,6 +38,6 @@ urlpatterns = [
     path('skills/prof/update-count', views.update_prof_key_skills),
     path('skills/update-graphs', views.update_skills_graphs),
     path('skills', views.get_skills),
-    path('vac', views.get_vacancies),
+    path('last-vacancies/', views.last_vacancies),
     path('', views.index)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

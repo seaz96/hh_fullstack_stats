@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullstack-разработчик</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header__inner">
+            <a href="/"><img
+                    src="https://assets-global.website-files.com/63ea859d3ade03089d7e65c6/63eafe4e7f082c964545d59b_fs_logo_color.svg"
+                    width=150px></a>
+            <nav class="nav">
+                <a class="nav__link" href="/">Главная</a>
+                <a class="nav__link" href="demand">Востребованность</a>
+                <a class="nav__link" href="geography">География</a>
+                <a class="nav__link" href="skills">Ключевые навыки</a>
+                <a class="nav__link" href="last-vacancies">Последние вакансии</a>
+            </nav>
+        </div>
+    </div>
+</header>
+<div id="content">
+    {% for vacancy in vacancies %}
+        <div>
+            <h2>{{ vacancy.name }}</h2>
+            <p><b>Зарплата:</b> {{ vacancy.salary }}</p>
+            <p>{{ vacancy.description|safe }}</p>
+            <p><strong>Условия:</strong></p>
+            <p><b>Навыки:</b>{{ vacancy.key_skills }}</p>
+            <p><b>Компания:</b>{{ vacancy.employer.name }}</p>
+            <p><b>Расположение:</b> {{ vacancy.area.name }}</p>
+            <p><b>Дата публикации:</b> {{ vacancy.published_at}}</p>
+            <hr>
+        </div>
+    {% endfor %}
+</div>
+
+<footer>© Азанов Никита Александрович РИ-220913. All rights reserved.</footer>
+</body>
+</html>
