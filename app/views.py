@@ -316,10 +316,14 @@ def update_geo_prof_avg(request):
     cursor.execute("""DELETE FROM geography_prof_average""")
     conn.commit()
 
-    for area in total_area.keys():
+    total_area = dict(sorted(total_area.items(), key=lambda item: item[1], reverse=True))
+
+    for index, area in enumerate(total_area.keys()):
         if (count_area[area] / total_count >= 0.01):
             cursor.execute(f"""INSERT INTO geography_prof_average VALUES ('{area}', {round(total_area[area] / count_curr_area[area], 2)})""")
             conn.commit()
+        if index == 9:
+            break
 
     conn.close()
 
@@ -506,7 +510,7 @@ def update_geo_graphs(request):
     sub[0].invert_yaxis()
     sub[0].grid(axis='x')
     sub[0].tick_params(axis='x', labelsize=8)
-    sub[0].tick_params(axis='y', labelsize=6)
+    sub[0].tick_params(axis='y', labelsize=10)
     sub[0].set_title('Уровень зарплат по городам')
 
     df = pd.read_sql('SELECT * FROM geography_prof_count', con, index_col=None)
@@ -558,3 +562,53 @@ def update_skills_graphs(request):
     plt.savefig(parent_dir + '/media/skills_graphs.png')
 
     return HttpResponse(status=200, content='Graphs updated!')
+
+def get_demand(request):
+    conn = sqlite3.connect("db.sqlite3")
+    sql_query = """SELECT *
+                        FROM demand_stats;"""
+    cursor = conn.cursor()
+    cursor.execute(sql_query)
+    data = cursor.fetchall()
+    conn.close()
+
+    response = [{'first': vac[0], 'second': vac[1], 'third': int(vac[2]), 'fourth': vac[3] if vac[3] != 0.0 else 'Нет данных', 'fifth': int(vac[4]) if vac[4] != 0.0 else 'Нет данных'} for vac in data]
+
+    return render(request, 'demand.html',
+                  {'first_parameter': 'Год', 'second_parameter': 'Общая средняя зарплата', 'third_parameter': 'Общее количество вакансий', 'fourth_parameter': 'Средняя зарплата fullstack-разработчика', 'fifth_parameter': 'Количество вакансий fullstack-разработчика', 'data': response})
+
+def get_geography(request):
+    conn = sqlite3.connect("db.sqlite3")
+    sql_query = """SELECT *
+                        FROM geography_prof_average;"""
+    cursor = conn.cursor()
+    cursor.execute(sql_query)
+    geo_average = cursor.fetchall()
+    sql_query = """SELECT *
+                            FROM geography_prof_count;"""
+    cursor.execute(sql_query)
+    geo_count = cursor.fetchall()
+    conn.close()
+    geo_average.sort(key=lambda x: x[1], reverse=True)
+    data_average = [{'first': vac[0], 'second': vac[1]} for index, vac in enumerate(geo_average) if index < 10]
+    data_count = [{'first': vac[0], 'second': vac[1]} for index, vac in enumerate(geo_count) if index < 10]
+
+    return render(request, 'geography.html',
+                  {'first_parameter': 'Город', 'second_parameter': 'Средняя зарплата', 'third_parameter': 'Количество вакансий', 'geo_average': data_average, 'geo_count': data_count})
+
+def get_skills(request):
+    conn = sqlite3.connect("db.sqlite3")
+    sql_query = """SELECT *
+                        FROM skills_prof;"""
+    cursor = conn.cursor()
+    cursor.execute(sql_query)
+    skills_count_year = cursor.fetchall()
+    conn.close()
+    data = []
+    for skill_year in skills_count_year:
+        year = skill_year[0]
+        counts = json.loads(skill_year[1])
+        data.append({'year': year, 'skills': [{'first': name, 'second': count} for name, count in counts.items()]})
+
+    return render(request, 'skills.html',
+                  {'first_parameter': 'Ключевой навык', 'second_parameter': 'Частота', 'data': data})

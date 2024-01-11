@@ -77,7 +77,6 @@ footer {
     background-color: #f3eeed;
     padding: 20px;
     border-radius: 5px;
-
 }
 
 nav {
@@ -86,8 +85,42 @@ nav {
     gap: 10px;
 }
 
-/* Сделай, чтобы класс right-img-align был справа относительно всего текста */
-img {
+.right-img-align {
     float: right;
     padding: 10px;
+}
+
+table, tr, td, th {
+    border: 1px solid #333;
+    text-align: center;
+    padding: 5px;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 0 auto;
+    margin-bottom: 10px;
+}
+
+table tbody tr:nth-child(odd){
+
+	background: #fff;
+
+}
+
+table tbody tr:nth-child(even){
+
+	background: #F7F7F7;
+
+}
+
+.table-container {
+    display: flex;
+}
+
+.many-tables-container{
+    display: flex;
+    flex-wrap: wrap;
+    -ms-flex-align: end;
+    column-gap: 150px;
 }

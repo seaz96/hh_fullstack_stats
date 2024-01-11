@@ -17,14 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from app import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('demand', views.get_demand),
     path('demand/total/update-count', views.demand_by_count),
     path('demand/total/update-average', views.demand_by_average),
     path('demand/prof/update-count', views.demand_by_count_prof),
     path('demand/prof/update-average', views.demand_by_average_prof),
     path('demand/update-graphs', views.update_demand_graphs),
+    path('geography', views.get_geography),
     path('geo/total/update-average', views.update_geo_total_avg),
     path('geo/prof/update-average', views.update_geo_prof_avg),
     path('geo/total/update-count', views.update_geo_total_count),
@@ -33,6 +37,7 @@ urlpatterns = [
     path('skills/total/update-count', views.update_total_key_skills),
     path('skills/prof/update-count', views.update_prof_key_skills),
     path('skills/update-graphs', views.update_skills_graphs),
+    path('skills', views.get_skills),
     path('vac', views.get_vacancies),
     path('', views.index)
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

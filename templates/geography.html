@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullstack-разработчик</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}?{% now "U" %}">
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header__inner">
+            <a href="/"><img
+                    src="https://assets-global.website-files.com/63ea859d3ade03089d7e65c6/63eafe4e7f082c964545d59b_fs_logo_color.svg"
+                    width=150px></a>
+
+            <nav class="nav">
+                <a class="nav__link" href="/">Главная</a>
+                <a class="nav__link" href="demand">Востребованность</a>
+                <a class="nav__link" href="geography">География</a>
+                <a class="nav__link" href="skills">Ключевые навыки</a>
+                <a class="nav__link" href="last-vacancies">Последние вакансии</a>
+            </nav>
+        </div>
+    </div>
+</header>
+<main id="content">
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>{{ first_parameter }}</th>
+                <th>{{ second_parameter }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for e in geo_average %}
+                <tr>
+                    <td>{{ e.first }}</td>
+                    <td>{{ e.second }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <table>
+            <thead>
+            <tr>
+                <th>{{ first_parameter }}</th>
+                <th>{{ third_parameter }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for e in geo_count %}
+                <tr>
+                    <td>{{ e.first }}</td>
+                    <td>{{ e.second }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="display: flex; padding-top: 20px; justify-content: center;">
+        <img src="../media/geo_graphs.png" style="width: 100%; max-width: 1530px">
+    </div>
+</main>
+
+<footer>© Азанов Никита Александрович РИ-220913. All rights reserved.</footer>
+</body>
+</html>
