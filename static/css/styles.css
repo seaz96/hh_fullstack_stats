@@ -21,10 +21,9 @@ a {
 
 
 a:hover {
-    color: navy;
+    color: #403fe9;
     transition: 0.5s;
-    font-size: 22px;
-    font-weight: bold;
+    font-size: 24px;
 }
 
 header .container .header__inner .header__logo {
@@ -37,10 +36,10 @@ header .container .header__inner .header__logo {
 
 }
 header {
-    background-color: #54ffb2;
+    background-color: #f3eeed;
     border-radius: 5px;
     /* Сделай обводку черного цвета */
-    border: 2px solid black;
+
     margin: 20px;
 }
 
@@ -54,10 +53,9 @@ body {
     background-attachment: fixed;
 }
 
-/* Сделай квадраты для элементов nav__link  */
+/* Сделай квадраты для элементов nav__link*/
 .nav__link {
     display: block;
-    background-color: white;
     padding: 10px;
     border-radius: 5px;
     height: 22px;
