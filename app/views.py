@@ -26,8 +26,8 @@ currency_columns = {
     'GEL': 9
 }
 
-def hello(request):
-    return render(request, 'hello.html', {'hello': 'hello'})
+def index(request):
+    return render(request, 'index.html')
 
 def demand_by_count(request):
     conn = sqlite3.connect('db.sqlite3')

@@ -1,0 +1,93 @@
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.header__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+    font-size: 20px;
+    transition: 0.5s;
+}
+
+
+a:hover {
+    color: navy;
+    transition: 0.5s;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+header .container .header__inner .header__logo {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+header .container .header__inner .header__logo {
+    font-size: 30px;
+
+}
+header {
+    background-color: #54ffb2;
+    border-radius: 5px;
+    /* Сделай обводку черного цвета */
+    border: 2px solid black;
+    margin: 20px;
+}
+
+/* Сделай теный фон для всей страницы */
+body {
+    font-family: 'Tahoma', sans-serif;
+    background: linear-gradient(darkseagreen, darkslategray);
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Сделай квадраты для элементов nav__link  */
+.nav__link {
+    display: block;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    height: 22px;
+    padding-bottom: 18px;
+}
+
+/* Сделай для #content отступ от границ экрана, белый фон и белый квадрат */
+#content {
+    margin: 20px;
+    background-color: #f3eeed;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+footer {
+    margin: 20px;
+    background-color: #f3eeed;
+    padding: 20px;
+    border-radius: 5px;
+
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Сделай, чтобы класс right-img-align был справа относительно всего текста */
+img {
+    float: right;
+    padding: 10px;
+}
