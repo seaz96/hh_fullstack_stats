@@ -15,7 +15,7 @@ header .container {
 a {
     text-decoration: none;
     color: black;
-    font-size: 20px;
+    font-size: 1vmax;
     transition: 0.5s;
 }
 
@@ -23,27 +23,24 @@ a {
 a:hover {
     color: #403fe9;
     transition: 0.5s;
-    font-size: 24px;
-}
-
-header .container .header__inner .header__logo {
-    font-size: 40px;
-    font-weight: bold;
+    font-size: 1.2vmax;
 }
 
 header .container .header__inner .header__logo {
     font-size: 30px;
-
+    font-weight: bold;
 }
+
 header {
     background-color: #f3eeed;
     border-radius: 5px;
-    /* Сделай обводку черного цвета */
-
     margin: 20px;
 }
 
-/* Сделай теный фон для всей страницы */
+header .container {
+    height: 40px;
+}
+
 body {
     font-family: 'Tahoma', sans-serif;
     background: linear-gradient(darkseagreen, darkslategray);
@@ -53,16 +50,12 @@ body {
     background-attachment: fixed;
 }
 
-/* Сделай квадраты для элементов nav__link*/
 .nav__link {
     display: block;
     padding: 10px;
     border-radius: 5px;
-    height: 22px;
-    padding-bottom: 18px;
 }
 
-/* Сделай для #content отступ от границ экрана, белый фон и белый квадрат */
 #content {
     margin: 20px;
     background-color: #f3eeed;
@@ -81,6 +74,8 @@ nav {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
 .right-img-align {
@@ -98,16 +93,14 @@ table {
     border-collapse: collapse;
     margin: 0 auto;
     margin-bottom: 10px;
+    overflow-x:auto;
 }
 
 table tbody tr:nth-child(odd){
-
 	background: #fff;
-
 }
 
 table tbody tr:nth-child(even){
-
 	background: #F7F7F7;
 
 }
